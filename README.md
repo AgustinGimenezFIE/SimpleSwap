@@ -92,7 +92,7 @@ npx hardhat coverage
 
 ## 📅 Deployment Date
 
-_Deployed on Sepolia testnet on:_ **June 22, 2025**
+_Deployed on Sepolia testnet on:_ **July, 2025**
 
 ## 👤 Author
 
