@@ -2,60 +2,64 @@
 
 ## 📄 Description
 
-**SimpleSwap** is a minimalistic decentralized token exchange protocol implemented in Solidity. It allows users to:
+**SimpleSwap** is a minimal decentralized token exchange protocol implemented in Solidity. It allows users to:
 - Add liquidity to a token pair.
 - Remove liquidity from a token pair.
-- Swap tokens using the constant product formula.
-- Get real-time prices between tokens.
-- Query output amounts from swaps.
+- Swap tokens using a constant product formula.
+- Get real-time price between tokens.
+- Estimate output amounts from swaps.
 
-It is designed for educational purposes and built following best practices.
+This project is built for educational purposes following best development and testing practices.
+
+---
 
 ## 🛠 Features
 
 - ERC20 token with owner-only minting (`MyToken.sol`)
-- Liquidity pool logic without LP tokens (`SimpleSwap.sol`)
-- Deterministic pool key hashing for any two ERC20 tokens
-- Basic error handling for insufficient allowance, deadline expiry, and slippage
-- Internal user liquidity tracking
+- Internal liquidity tracking (no LP tokens)
+- Swap logic using constant product formula
+- Deterministic pool key hashing for token pairs
+- Deadline, slippage, and allowance validation
+- MetaMask integration in frontend
+- Code coverage > 50% with Hardhat
+
+---
 
 ## 🚀 Deployment
 
-The project was deployed to the Sepolia testnet using Remix and MetaMask.
+Contracts deployed to the **Sepolia Testnet** using Remix and MetaMask:
 
-| Contract | Address |
-|---------|---------|
-| **Token A** | `0xD33CDB9f37Af6909Fb322104E01Ce908F6aCAB1B` |
-| **Token B** | `0xb2587cf3af483e8c2448b7922b7691b2aff8b09b` |
-| **SimpleSwap** | `0x024d1e8c738db213c55fde6fda46bca8c8a8e98a` |
+| Contract      | Address                                      |
+|---------------|----------------------------------------------|
+| Token A       | `0xD33CDB9f37Af6909Fb322104E01Ce908F6aCAB1B` |
+| Token B       | `0xb2587cf3af483e8c2448b7922b7691b2aff8b09b` |
+| SimpleSwap    | `0x024d1e8c738db213c55fde6fda46bca8c8a8e98a` |
 
-### 🧪 Verification Test
+🔍 [View Verification on Etherscan](https://sepolia.etherscan.io/tx/0xb27168ef9cee038564e51baf1164dd1d07eb05dd1ec5ea27b37eb869f037cb1d)
 
-A verification transaction was performed successfully and can be found on [Etherscan](https://sepolia.etherscan.io/tx/0xb27168ef9cee038564e51baf1164dd1d07eb05dd1ec5ea27b37eb869f037cb1d).
+---
 
-## ✅ Instructions to Reproduce
+## 🌐 Live Demo
 
-1. Deploy `MyToken.sol` twice for Token A and Token B with custom names and symbols.
-2. Deploy `SimpleSwap.sol`.
-3. Mint tokens to a user wallet.
-4. Approve the SimpleSwap contract to spend both Token A and Token B.
-5. Use `addLiquidity(...)` with desired amounts and a reasonable deadline.
-6. Call `swapExactTokensForTokens(...)` to swap tokens.
-7. Optionally use `getPrice(...)` and `getAmountOut(...)` for analytics.
+✅ Deployed at:  
+🔗 [https://imprenet.ar/ethkipu](https://imprenet.ar/ethkipu)
 
-## 🧠 Design Considerations
+You can:
+- Connect MetaMask
+- Add liquidity
+- Swap tokens
+- See token prices and output estimates
 
-- Contract uses a single source of truth for liquidity via internal mappings instead of LP tokens.
-- Minimal dependencies and gas-efficient logic.
-- Ensures deterministic pool identification to prevent mismatches.
+---
 
-## 📝 Evaluation Criteria
+## ✅ Testing & Coverage
 
-This repository includes:
-- ✅ A smart contract implementing all five requested functions.
-- ✅ Code is well-commented with **NatSpec** format.
-- ✅ Deployment and verification completed successfully.
-- ✅ Markdown documentation in English as required.
+Unit tests and coverage were run using Hardhat:
+
+```bash
+npx hardhat test
+npx hardhat coverage
+
 
 ## 📚 File Structure
 
