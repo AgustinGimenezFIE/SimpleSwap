@@ -59,17 +59,19 @@ Tests written using Hardhat and Chai. Run with:
 ```bash
 npx hardhat test
 npx hardhat coverage
-Coverage results:
-
+```
+## ✅ Coverage Results
+```bash
 | Metric     | Result |
 |------------|--------|
 | Statements | 68.57% |
 | Branches   | 40.00% |
 | Functions  | 87.50% |
 | Lines      | 66.10% |
+```
 
 ## 📚 File Structure
-
+```bash
 .
 ├── frontend/
 │ ├── index.html # Frontend HTML interface
@@ -84,6 +86,8 @@ Coverage results:
 │   ├── MyToken.sol       # ERC20 with owner-only mint
 │   └── SimpleSwap.sol    # Core swap + liquidity logic
 ├── README.md             # This file
+```
+
 
 
 ## 📅 Deployment Date
