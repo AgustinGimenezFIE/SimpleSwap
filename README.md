@@ -59,3 +59,20 @@ Tests written using Hardhat and Chai. Run with:
 ```bash
 npx hardhat test
 npx hardhat coverage
+Coverage results:
+
+| Metric     | Result |
+|------------|--------|
+| Statements | 68.57% |
+| Branches   | 40.00% |
+| Functions  | 87.50% |
+| Lines      | 66.10% |
+
+📸 Coverage Screenshot:
+
+![Coverage](./coverage-screenshot.png)
+
+---
+
+## 📚 File Structure
+
