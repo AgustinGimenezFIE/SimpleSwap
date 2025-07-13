@@ -25,7 +25,7 @@ The project was deployed to the Sepolia testnet using Remix and MetaMask.
 
 | Contract | Address |
 |---------|---------|
-| **Token A** | `0x5F8262Eab3357BdEB54d416ccbF025Cbe220EB28` |
+| **Token A** | `0xD33CDB9f37Af6909Fb322104E01Ce908F6aCAB1B` |
 | **Token B** | `0xb2587cf3af483e8c2448b7922b7691b2aff8b09b` |
 | **SimpleSwap** | `0x024d1e8c738db213c55fde6fda46bca8c8a8e98a` |
 
