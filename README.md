@@ -64,10 +64,10 @@ npx hardhat coverage
 ```bash
 | Metric     | Result |
 |------------|--------|
-| Statements | 68.57% |
-| Branches   | 40.00% |
-| Functions  | 87.50% |
-| Lines      | 66.10% |
+| Statements | 100.00% |
+| Branches   | 55.88% |
+| Functions  | 100.00% |
+| Lines      | 93.85% |
 ```
 
 ## 📚 File Structure
