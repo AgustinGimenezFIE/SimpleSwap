@@ -31,9 +31,9 @@ Contracts deployed to the **Sepolia Testnet** using Remix and MetaMask:
 
 | Contract      | Address                                      |
 |---------------|----------------------------------------------|
-| Token A       | `0xD33CDB9f37Af6909Fb322104E01Ce908F6aCAB1B` |
-| Token B       | `0xb2587cf3af483e8c2448b7922b7691b2aff8b09b` |
-| SimpleSwap    | `0x024d1e8c738db213c55fde6fda46bca8c8a8e98a` |
+| Token A       | `0x5F8262Eab3357BdEB54d416ccbF025Cbe220EB28` |
+| Token B       | `0xB2587Cf3AF483E8C2448b7922B7691B2AFF8B09B` |
+| SimpleSwap    | `0x622f1970336c01a34Dd7d4c5374bFFB6Bb526964` |
 
 🔍 [Etherscan Verification](https://sepolia.etherscan.io/tx/0xb27168ef9cee038564e51baf1164dd1d07eb05dd1ec5ea27b37eb869f037cb1d)
 
