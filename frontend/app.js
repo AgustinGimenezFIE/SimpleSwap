@@ -1,4 +1,4 @@
-const simpleSwapAddress = "0xD33CDB9f37Af6909Fb322104E01Ce908F6aCAB1B";
+const simpleSwapAddress = "0x622f1970336c01a34Dd7d4c5374bFFB6Bb526964"; 
 const tokenA = "0x5F8262Eab3357BdEB54d416ccbF025Cbe220EB28";
 const tokenB = "0xb2587cf3af483e8c2448b7922b7691b2aff8b09b";
 
@@ -34,7 +34,7 @@ async function loadABI() {
 
 async function connectWallet() {
   if (window.ethereum) {
-    await loadABI(); // 🔁 Cargar ABI antes de usarlo
+    await loadABI();
     web3 = new Web3(window.ethereum);
     await window.ethereum.request({ method: "eth_requestAccounts" });
     const accounts = await web3.eth.getAccounts();
@@ -79,9 +79,13 @@ async function calculateAmountOut() {
 
   const amountIn = web3.utils.toWei(input, "ether");
 
-  const key = await simpleSwap.methods.getPrice(tokenA, tokenB).call();
-  const reserveA = await simpleSwap.methods.getAmountOut(amountIn, 1e18, key).call(); // Simulación
-
-  const amountOut = web3.utils.fromWei(reserveA, "ether");
-  document.getElementById("amountOutMin").value = amountOut;
+  try {
+    const price = await simpleSwap.methods.getPrice(tokenA, tokenB).call();
+    const estimatedOut = BigInt(amountIn) * BigInt(price) / BigInt(1e18);
+    const formattedOut = web3.utils.fromWei(estimatedOut.toString(), "ether");
+    document.getElementById("amountOutMin").value = formattedOut;
+  } catch (error) {
+    console.error("Error estimating output amount:", error);
+    document.getElementById("amountOutMin").value = "Error";
+  }
 }
