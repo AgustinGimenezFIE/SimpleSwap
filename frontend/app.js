@@ -1,4 +1,4 @@
-const simpleSwapAddress = "0x622f1970336c01a34Dd7d4c5374bFFB6Bb526964"; 
+const simpleSwapAddress = "0x622f1970336c01a34Dd7d4c5374bFFB6Bb526964";
 const tokenA = "0x5F8262Eab3357BdEB54d416ccbF025Cbe220EB28";
 const tokenB = "0xb2587cf3af483e8c2448b7922b7691b2aff8b09b";
 
@@ -59,30 +59,56 @@ async function approve() {
 }
 
 async function swap() {
-  const amountIn = web3.utils.toWei(document.getElementById("amountIn").value, "ether");
-  const amountOutMin = web3.utils.toWei(document.getElementById("amountOutMin").value, "ether");
+  if (!web3 || !simpleSwap) return;
+
+  const input = document.getElementById("amountIn").value;
+  if (!input || isNaN(input)) {
+    alert("Invalid input amount");
+    return;
+  }
+
+  const amountIn = BigInt(web3.utils.toWei(input, "ether"));
   const deadline = Math.floor(Date.now() / 1000) + 300;
   const path = [tokenA, tokenB];
 
-  await simpleSwap.methods.swapExactTokensForTokens(
-    amountIn, amountOutMin, path, account, deadline
-  ).send({ from: account });
+  try {
+    const price = await simpleSwap.methods.getPrice(tokenA, tokenB).call();
+    const priceBN = BigInt(price);
 
-  alert("Swap completed");
+    // Estimate output and apply 1% slippage tolerance
+    const estimatedOut = (amountIn * priceBN) / BigInt(1e18);
+    const amountOutMin = (estimatedOut * 95n) / 100n;
+
+
+    await simpleSwap.methods.swapExactTokensForTokens(
+      amountIn.toString(),
+      amountOutMin.toString(),
+      path,
+      account,
+      deadline
+    ).send({ from: account });
+
+    alert("Swap completed");
+  } catch (error) {
+    console.error("Swap failed:", error);
+    alert("Swap failed: " + (error?.message || "unknown error"));
+  }
 }
 
 async function calculateAmountOut() {
   if (!web3 || !simpleSwap) return;
 
   const input = document.getElementById("amountIn").value;
-  if (!input) return;
-
-  const amountIn = web3.utils.toWei(input, "ether");
+  if (!input || isNaN(input)) return;
 
   try {
+    const amountIn = BigInt(web3.utils.toWei(input, "ether"));
     const price = await simpleSwap.methods.getPrice(tokenA, tokenB).call();
-    const estimatedOut = BigInt(amountIn) * BigInt(price) / BigInt(1e18);
+    const priceBN = BigInt(price);
+
+    const estimatedOut = (amountIn * priceBN) / BigInt(1e18);
     const formattedOut = web3.utils.fromWei(estimatedOut.toString(), "ether");
+
     document.getElementById("amountOutMin").value = formattedOut;
   } catch (error) {
     console.error("Error estimating output amount:", error);
