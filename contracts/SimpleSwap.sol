@@ -9,23 +9,22 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @dev Liquidity is tracked internally. No LP tokens are issued.
  */
 contract SimpleSwap {
-    /// @notice Represents the state of a liquidity pool for a token pair
+    /// @notice Represents a liquidity pool for a token pair
     struct LiquidityPool {
-        uint256 reserveA;                    ///< Amount of token A in the pool
-        uint256 reserveB;                    ///< Amount of token B in the pool
-        mapping(address => uint256) liquidityShares; ///< Mapping of user address to liquidity share
-        uint256 totalLiquidity;              ///< Total liquidity added to the pool
+        uint256 reserveA;
+        uint256 reserveB;
+        mapping(address => uint256) liquidityShares;
+        uint256 totalLiquidity;
     }
 
-    /// @notice Mapping from pool key to its corresponding LiquidityPool
+    /// @notice Maps token pair hash to liquidity pool
     mapping(bytes32 => LiquidityPool) private pools;
 
     /**
-     * @notice Generates a unique identifier for a token pair
-     * @dev Token order is normalized to ensure consistent pool mapping
-     * @param tokenA Address of the first token
-     * @param tokenB Address of the second token
-     * @return key The unique identifier for the token pair
+     * @notice Internal function to compute a unique key for a token pair
+     * @param tokenA Address of token A
+     * @param tokenB Address of token B
+     * @return key Unique identifier for the pool
      */
     function _getPoolKey(address tokenA, address tokenB) private pure returns (bytes32 key) {
         key = tokenA < tokenB
@@ -34,18 +33,18 @@ contract SimpleSwap {
     }
 
     /**
-     * @notice Adds liquidity to the pool for a given token pair
+     * @notice Add liquidity to a token pair pool
      * @param tokenA Address of token A
      * @param tokenB Address of token B
-     * @param amountADesired Desired amount of token A to deposit
-     * @param amountBDesired Desired amount of token B to deposit
-     * @param amountAMin Minimum amount of token A to accept
-     * @param amountBMin Minimum amount of token B to accept
-     * @param to Address receiving the liquidity share
-     * @param deadline Unix timestamp after which the transaction is rejected
-     * @return amountA Actual amount of token A deposited
-     * @return amountB Actual amount of token B deposited
-     * @return liquidity Total liquidity credited to the user
+     * @param amountADesired Amount of token A to deposit
+     * @param amountBDesired Amount of token B to deposit
+     * @param amountAMin Minimum token A to accept
+     * @param amountBMin Minimum token B to accept
+     * @param to Address receiving liquidity shares
+     * @param deadline Unix timestamp after which tx is rejected
+     * @return amountA Actual token A deposited
+     * @return amountB Actual token B deposited
+     * @return liquidity Liquidity shares received
      */
     function addLiquidity(
         address tokenA,
@@ -72,25 +71,23 @@ contract SimpleSwap {
 
         liquidity = amountA + amountB;
 
-        unchecked {
-            pool.reserveA += amountA;
-            pool.reserveB += amountB;
-            pool.liquidityShares[to] += liquidity;
-            pool.totalLiquidity += liquidity;
-        }
+        pool.reserveA += amountA;
+        pool.reserveB += amountB;
+        pool.liquidityShares[to] += liquidity;
+        pool.totalLiquidity += liquidity;
     }
 
     /**
-     * @notice Removes liquidity from a token pair pool
+     * @notice Remove liquidity and withdraw tokens
      * @param tokenA Address of token A
      * @param tokenB Address of token B
      * @param liquidity Amount of liquidity to remove
-     * @param amountAMin Minimum amount of token A to receive
-     * @param amountBMin Minimum amount of token B to receive
-     * @param to Address to receive the withdrawn tokens
-     * @param deadline Unix timestamp after which the transaction is rejected
-     * @return amountA Amount of token A returned to the user
-     * @return amountB Amount of token B returned to the user
+     * @param amountAMin Minimum token A to receive
+     * @param amountBMin Minimum token B to receive
+     * @param to Address receiving tokens
+     * @param deadline Unix timestamp after which tx is rejected
+     * @return amountA Token A amount returned
+     * @return amountB Token B amount returned
      */
     function removeLiquidity(
         address tokenA,
@@ -118,24 +115,22 @@ contract SimpleSwap {
 
         require(amountA >= amountAMin && amountB >= amountBMin, "MinNotMet");
 
-        unchecked {
-            pool.reserveA = reserveA - amountA;
-            pool.reserveB = reserveB - amountB;
-            pool.liquidityShares[msg.sender] = userShare - liquidity;
-            pool.totalLiquidity = totalLiq - liquidity;
-        }
+        pool.reserveA = reserveA - amountA;
+        pool.reserveB = reserveB - amountB;
+        pool.liquidityShares[msg.sender] = userShare - liquidity;
+        pool.totalLiquidity = totalLiq - liquidity;
 
         IERC20(tokenA).transfer(to, amountA);
         IERC20(tokenB).transfer(to, amountB);
     }
 
     /**
-     * @notice Executes a token swap between two tokens using a fixed input amount
-     * @param amountIn Amount of input token to swap
-     * @param amountOutMin Minimum acceptable output token amount
-     * @param path Array of two addresses: [inputToken, outputToken]
-     * @param to Recipient address of the output token
-     * @param deadline Unix timestamp after which the transaction is rejected
+     * @notice Swap tokenIn for tokenOut
+     * @param amountIn Amount of input token
+     * @param amountOutMin Minimum output token to receive
+     * @param path Array: [tokenIn, tokenOut]
+     * @param to Receiver of output token
+     * @param deadline Unix timestamp after which tx is rejected
      */
     function swapExactTokensForTokens(
         uint256 amountIn,
@@ -153,44 +148,64 @@ contract SimpleSwap {
         bytes32 key = _getPoolKey(tokenIn, tokenOut);
         LiquidityPool storage pool = pools[key];
 
-        (uint256 reserveIn, uint256 reserveOut) = tokenIn < tokenOut
-            ? (pool.reserveA, pool.reserveB)
-            : (pool.reserveB, pool.reserveA);
+        uint256 reserveIn;
+        uint256 reserveOut;
+
+        if (tokenIn < tokenOut) {
+            reserveIn = pool.reserveA;
+            reserveOut = pool.reserveB;
+        } else {
+            reserveIn = pool.reserveB;
+            reserveOut = pool.reserveA;
+        }
 
         IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
 
-        uint256 amountOut = (amountIn * reserveOut) / (reserveIn + amountIn);
+        uint256 amountOut = getAmountOut(amountIn, reserveIn, reserveOut);
         require(amountOut >= amountOutMin, "Slippage");
 
-        unchecked {
-            if (tokenIn < tokenOut) {
-                pool.reserveA = reserveIn + amountIn;
-                pool.reserveB = reserveOut - amountOut;
-            } else {
-                pool.reserveB = reserveIn + amountIn;
-                pool.reserveA = reserveOut - amountOut;
-            }
+        if (tokenIn < tokenOut) {
+            pool.reserveA = reserveIn + amountIn;
+            pool.reserveB = reserveOut - amountOut;
+        } else {
+            pool.reserveB = reserveIn + amountIn;
+            pool.reserveA = reserveOut - amountOut;
         }
 
         IERC20(tokenOut).transfer(to, amountOut);
     }
 
     /**
-     * @notice Returns the current exchange rate for a token pair
-     * @param tokenA Address of the base token
-     * @param tokenB Address of the quote token
-     * @return price Current price of tokenB per tokenA, scaled by 1e18
+     * @notice Returns price of tokenB per tokenA
+     * @param tokenA Base token
+     * @param tokenB Quote token
+     * @return price Price scaled by 1e18
      */
     function getPrice(address tokenA, address tokenB) external view returns (uint256 price) {
         bytes32 key = _getPoolKey(tokenA, tokenB);
         LiquidityPool storage pool = pools[key];
 
-        (uint256 reserveA, uint256 reserveB) = tokenA < tokenB
-            ? (pool.reserveA, pool.reserveB)
-            : (pool.reserveB, pool.reserveA);
+        uint256 reserveA = tokenA < tokenB ? pool.reserveA : pool.reserveB;
+        uint256 reserveB = tokenA < tokenB ? pool.reserveB : pool.reserveA;
 
         require(reserveA > 0, "NoLiquidity");
-
         price = (reserveB * 1e18) / reserveA;
+    }
+
+    /**
+     * @notice Calculates output tokens for a given input
+     * @dev Pure function, can be called off-chain
+     * @param amountIn Input token amount
+     * @param reserveIn Reserve of input token
+     * @param reserveOut Reserve of output token
+     * @return amountOut Output token amount
+     */
+    function getAmountOut(uint256 amountIn, uint256 reserveIn, uint256 reserveOut)
+        public
+        pure
+        returns (uint256 amountOut)
+    {
+        require(amountIn > 0 && reserveIn > 0 && reserveOut > 0, "InvalidReserves");
+        amountOut = (amountIn * reserveOut) / (reserveIn + amountIn);
     }
 }
