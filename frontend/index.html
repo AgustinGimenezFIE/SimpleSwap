@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SimpleSwap Interface</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+  <div id="swap-box">
+    <h2>SimpleSwap</h2>
+
+    <p>Connected wallet: <span id="account">Not connected</span></p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <button onclick="disconnectWallet()">Disconnect</button>
+
+    <div id="swap-menu">
+      <input
+        type="text"
+        id="amountIn"
+        placeholder="Amount in Token A"
+        oninput="calculateAmountOut()" />
+
+      <input
+        type="text"
+        id="amountOutMin"
+        placeholder="Estimated amount in Token B"
+        readonly />
+
+      <button onclick="approve()">Approve Token A</button>
+      <button onclick="swap()">Swap</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
